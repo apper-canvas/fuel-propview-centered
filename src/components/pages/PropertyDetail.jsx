@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { toast } from 'react-toastify'
-import ApperIcon from '@/components/ApperIcon'
-import Button from '@/components/atoms/Button'
-import Badge from '@/components/atoms/Badge'
-import PropertyGallery from '@/components/organisms/PropertyGallery'
-import Loading from '@/components/ui/Loading'
-import Error from '@/components/ui/Error'
-import { propertyService } from '@/services/api/propertyService'
-import { savedPropertyService } from '@/services/api/savedPropertyService'
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { inquiryService } from "@/services/api/inquiryService";
+import ApperIcon from "@/components/ApperIcon";
+import PropertyGallery from "@/components/organisms/PropertyGallery";
+import Badge from "@/components/atoms/Badge";
+import Label from "@/components/atoms/Label";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import { savedPropertyService } from "@/services/api/savedPropertyService";
+import { propertyService } from "@/services/api/propertyService";
 
 const PropertyDetail = () => {
   const { id } = useParams()
@@ -17,9 +20,13 @@ const PropertyDetail = () => {
   const [property, setProperty] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [isSaved, setIsSaved] = useState(false)
+const [isSaved, setIsSaved] = useState(false)
   const [saveLoading, setSaveLoading] = useState(false)
-
+  const [inquiryForm, setInquiryForm] = useState({
+    email: '',
+    message: ''
+  })
+  const [inquiryLoading, setInquiryLoading] = useState(false)
   useEffect(() => {
     loadProperty()
     checkIfSaved()
@@ -74,7 +81,7 @@ const PropertyDetail = () => {
     }
   }
 
-  const formatPrice = (price) => {
+const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -82,7 +89,37 @@ const PropertyDetail = () => {
       maximumFractionDigits: 0
     }).format(price)
   }
+  const handleInquirySubmit = async (e) => {
+    e.preventDefault()
+    
+    if (!inquiryForm.email || !inquiryForm.message) {
+      toast.error('Please fill in all fields')
+      return
+    }
 
+    setInquiryLoading(true)
+    try {
+      await inquiryService.create({
+        email: inquiryForm.email,
+        message: inquiryForm.message,
+        propertyId: id
+      })
+      
+      setInquiryForm({ email: '', message: '' })
+      toast.success('Your inquiry has been sent successfully!')
+    } catch (err) {
+      toast.error('Failed to send inquiry. Please try again.')
+    } finally {
+      setInquiryLoading(false)
+    }
+  }
+
+  const handleInputChange = (field, value) => {
+    setInquiryForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
   if (loading) return <Loading type="detail" />
   if (error) return <Error message={error} onRetry={loadProperty} />
   if (!property) return <Error message="Property not found" />
@@ -199,30 +236,95 @@ const PropertyDetail = () => {
                   <span className="text-gray-700">{feature}</span>
                 </div>
               ))}
-            </div>
+</div>
           </div>
+
+          {/* Neighborhood Information */}
+          {property.neighborhoodInfo && (
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="font-display text-xl font-semibold text-gray-900 mb-4">
+                Neighborhood Information
+              </h2>
+              <div className="prose max-w-none">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {property.neighborhoodInfo}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Contact Card */}
+<div className="space-y-6">
+          {/* Contact Form */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h3 className="font-display text-lg font-semibold text-gray-900 mb-4">
               Contact Agent
             </h3>
-            <div className="space-y-3">
-              <Button className="w-full">
-                <ApperIcon name="Phone" size={16} className="mr-2" />
-                Call Agent
+            <form onSubmit={handleInquirySubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={inquiryForm.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  placeholder="Enter your email address"
+                  required
+                  className="w-full"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                  Message
+                </Label>
+                <textarea
+                  id="message"
+                  value={inquiryForm.message}
+                  onChange={(e) => handleInputChange('message', e.target.value)}
+                  placeholder="I'm interested in this property..."
+                  required
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                />
+              </div>
+              
+              <Button 
+                type="submit" 
+                disabled={inquiryLoading}
+                className="w-full"
+              >
+                {inquiryLoading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <ApperIcon name="Send" size={16} className="mr-2" />
+                    Send Inquiry
+                  </>
+                )}
               </Button>
-              <Button variant="secondary" className="w-full">
-                <ApperIcon name="Mail" size={16} className="mr-2" />
-                Send Message
-              </Button>
-              <Button variant="ghost" className="w-full">
-                <ApperIcon name="Calendar" size={16} className="mr-2" />
-                Schedule Tour
-              </Button>
+            </form>
+            
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex space-x-2">
+                <Button variant="ghost" size="sm" className="flex-1">
+                  <ApperIcon name="Phone" size={14} className="mr-1" />
+                  Call
+                </Button>
+                <Button variant="ghost" size="sm" className="flex-1">
+                  <ApperIcon name="Calendar" size={14} className="mr-1" />
+                  Tour
+                </Button>
+              </div>
             </div>
           </div>
 

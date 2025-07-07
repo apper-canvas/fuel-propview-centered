@@ -11,13 +11,14 @@ const transformToDatabase = (uiData) => {
     bathrooms: uiData.bathrooms,
     square_feet: uiData.squareFeet,
     property_type: uiData.propertyType,
-    images: Array.isArray(uiData.images) ? uiData.images.join(',') : uiData.images,
+images: Array.isArray(uiData.images) ? uiData.images.join(',') : uiData.images,
     description: uiData.description,
     features: Array.isArray(uiData.features) ? uiData.features.join(',') : uiData.features,
     coordinates_lat: uiData.coordinates?.lat,
     coordinates_lng: uiData.coordinates?.lng,
     listing_date: uiData.listingDate,
-    status: uiData.status
+    status: uiData.status,
+    neighborhood_info: uiData.neighborhoodInfo
   };
 };
 
@@ -37,7 +38,7 @@ const transformFromDatabase = (dbData) => {
     bathrooms: dbData.bathrooms,
     squareFeet: dbData.square_feet,
     propertyType: dbData.property_type,
-    images: dbData.images ? (typeof dbData.images === 'string' ? dbData.images.split(',') : dbData.images) : [],
+images: dbData.images ? (typeof dbData.images === 'string' ? dbData.images.split(',') : dbData.images) : [],
     description: dbData.description,
     features: dbData.features ? (typeof dbData.features === 'string' ? dbData.features.split(',') : dbData.features) : [],
     coordinates: {
@@ -45,7 +46,8 @@ const transformFromDatabase = (dbData) => {
       lng: dbData.coordinates_lng
     },
     listingDate: dbData.listing_date,
-    status: dbData.status
+    status: dbData.status,
+    neighborhoodInfo: dbData.neighborhood_info
   };
 };
 
@@ -74,9 +76,10 @@ export const propertyService = {
           { field: { Name: "description" } },
           { field: { Name: "features" } },
           { field: { Name: "coordinates_lat" } },
-          { field: { Name: "coordinates_lng" } },
+{ field: { Name: "coordinates_lng" } },
           { field: { Name: "listing_date" } },
-          { field: { Name: "status" } }
+          { field: { Name: "status" } },
+          { field: { Name: "neighborhood_info" } }
         ],
         where: [],
         pagingInfo: { limit: 100, offset: 0 }
@@ -205,12 +208,12 @@ export const propertyService = {
           { field: { Name: "description" } },
           { field: { Name: "features" } },
           { field: { Name: "coordinates_lat" } },
-          { field: { Name: "coordinates_lng" } },
+{ field: { Name: "coordinates_lng" } },
           { field: { Name: "listing_date" } },
-          { field: { Name: "status" } }
+          { field: { Name: "status" } },
+          { field: { Name: "neighborhood_info" } }
         ]
       };
-
       const response = await apperClient.getRecordById('property', parseInt(id), params);
 
       if (!response.success) {
@@ -257,9 +260,10 @@ export const propertyService = {
           { field: { Name: "description" } },
           { field: { Name: "features" } },
           { field: { Name: "coordinates_lat" } },
-          { field: { Name: "coordinates_lng" } },
+{ field: { Name: "coordinates_lng" } },
           { field: { Name: "listing_date" } },
-          { field: { Name: "status" } }
+          { field: { Name: "status" } },
+          { field: { Name: "neighborhood_info" } }
         ],
         whereGroups: query ? [{
           operator: "OR",
