@@ -1,0 +1,20 @@
+[
+  {
+    "Id": 1,
+    "propertyId": "1",
+    "savedDate": "2024-02-25T10:30:00Z",
+    "notes": "Love the downtown location and modern finishes"
+  },
+  {
+    "Id": 2,
+    "propertyId": "3",
+    "savedDate": "2024-02-26T14:15:00Z",
+    "notes": "Amazing views but need to check HOA fees"
+  },
+  {
+    "Id": 3,
+    "propertyId": "5",
+    "savedDate": "2024-02-27T09:45:00Z",
+    "notes": "Perfect for family, great neighborhood"
+  }
+]
