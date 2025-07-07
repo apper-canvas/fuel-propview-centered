@@ -1,57 +1,252 @@
-import mockSavedProperties from '@/services/mockData/savedProperties.json'
+// Transform data from UI format to database format
+const transformToDatabase = (uiData) => {
+  return {
+    property_id: parseInt(uiData.propertyId),
+    saved_date: uiData.savedDate || new Date().toISOString(),
+    notes: uiData.notes || ''
+  };
+};
 
-let savedProperties = [...mockSavedProperties]
-
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+// Transform data from database format to UI format
+const transformFromDatabase = (dbData) => {
+  return {
+    Id: dbData.Id,
+    propertyId: dbData.property_id ? dbData.property_id.toString() : '',
+    savedDate: dbData.saved_date,
+    notes: dbData.notes || ''
+  };
+};
 
 export const savedPropertyService = {
   getAll: async () => {
-    await delay(200)
-    return [...savedProperties]
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+
+      const params = {
+        fields: [
+          { field: { Name: "property_id" } },
+          { field: { Name: "saved_date" } },
+          { field: { Name: "notes" } }
+        ],
+        pagingInfo: { limit: 100, offset: 0 }
+      };
+
+      const response = await apperClient.fetchRecords('saved_property', params);
+
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      return (response.data || []).map(transformFromDatabase);
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error fetching saved properties:", error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      throw error;
+    }
   },
 
   getById: async (id) => {
-    await delay(200)
-    const saved = savedProperties.find(s => s.Id === parseInt(id))
-    if (!saved) {
-      throw new Error('Saved property not found')
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+
+      const params = {
+        fields: [
+          { field: { Name: "property_id" } },
+          { field: { Name: "saved_date" } },
+          { field: { Name: "notes" } }
+        ]
+      };
+
+      const response = await apperClient.getRecordById('saved_property', parseInt(id), params);
+
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (!response.data) {
+        throw new Error('Saved property not found');
+      }
+
+      return transformFromDatabase(response.data);
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error(`Error fetching saved property with ID ${id}:`, error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      throw error;
     }
-    return { ...saved }
   },
 
   create: async (savedData) => {
-    await delay(300)
-    const newSaved = {
-      ...savedData,
-      Id: Math.max(...savedProperties.map(s => s.Id)) + 1,
-      savedDate: new Date().toISOString()
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+
+      const dbData = transformToDatabase(savedData);
+      const params = {
+        records: [dbData]
+      };
+
+      const response = await apperClient.createRecord('saved_property', params);
+
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        if (failedRecords.length > 0) {
+          console.error(`Failed to create ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error(failedRecords[0].message || 'Failed to save property');
+        }
+
+        const successfulRecord = response.results.find(result => result.success);
+        return transformFromDatabase(successfulRecord.data);
+      }
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error creating saved property:", error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      throw error;
     }
-    savedProperties.push(newSaved)
-    return { ...newSaved }
   },
 
   update: async (id, savedData) => {
-    await delay(300)
-    const index = savedProperties.findIndex(s => s.Id === parseInt(id))
-    if (index === -1) {
-      throw new Error('Saved property not found')
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+
+      const dbData = transformToDatabase(savedData);
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          ...dbData
+        }]
+      };
+
+      const response = await apperClient.updateRecord('saved_property', params);
+
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        if (failedRecords.length > 0) {
+          console.error(`Failed to update ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error(failedRecords[0].message || 'Failed to update saved property');
+        }
+
+        const successfulRecord = response.results.find(result => result.success);
+        return transformFromDatabase(successfulRecord.data);
+      }
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error updating saved property:", error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      throw error;
     }
-    savedProperties[index] = { ...savedProperties[index], ...savedData }
-    return { ...savedProperties[index] }
   },
 
   delete: async (id) => {
-    await delay(200)
-    const index = savedProperties.findIndex(s => s.Id === parseInt(id))
-    if (index === -1) {
-      throw new Error('Saved property not found')
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+
+      const params = {
+        RecordIds: [parseInt(id)]
+      };
+
+      const response = await apperClient.deleteRecord('saved_property', params);
+
+      if (!response.success) {
+        console.error(response.message);
+        throw new Error(response.message);
+      }
+
+      if (response.results) {
+        const failedRecords = response.results.filter(result => !result.success);
+        if (failedRecords.length > 0) {
+          console.error(`Failed to delete ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error(failedRecords[0].message || 'Failed to delete saved property');
+        }
+      }
+
+      return true;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error deleting saved property:", error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      throw error;
     }
-    savedProperties.splice(index, 1)
-    return true
   },
 
   isPropertySaved: async (propertyId) => {
-    await delay(100)
-    return savedProperties.some(s => s.propertyId === propertyId.toString())
+    try {
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+
+      const params = {
+        fields: [
+          { field: { Name: "property_id" } }
+        ],
+        where: [{
+          FieldName: "property_id",
+          Operator: "EqualTo",
+          Values: [parseInt(propertyId)]
+        }],
+        pagingInfo: { limit: 1, offset: 0 }
+      };
+
+      const response = await apperClient.fetchRecords('saved_property', params);
+
+      if (!response.success) {
+        console.error(response.message);
+        return false;
+      }
+
+      return response.data && response.data.length > 0;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error("Error checking if property is saved:", error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      return false;
+    }
   }
-}
+};

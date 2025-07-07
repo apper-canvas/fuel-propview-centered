@@ -1,13 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { useSelector } from 'react-redux'
 import ApperIcon from '@/components/ApperIcon'
 import Button from '@/components/atoms/Button'
 import SearchBar from '@/components/molecules/SearchBar'
+import { AuthContext } from '@/App'
 
 const Header = ({ onSearch, savedCount = 0 }) => {
-  const location = useLocation()
+const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { logout } = useContext(AuthContext)
+  const { user } = useSelector((state) => state.user)
 
   const navigation = [
     { name: 'Browse', href: '/browse', icon: 'Home' },
@@ -57,17 +61,40 @@ const Header = ({ onSearch, savedCount = 0 }) => {
                 )}
               </Link>
             ))}
-          </nav>
+</nav>
 
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden p-2"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            <ApperIcon name={isMobileMenuOpen ? "X" : "Menu"} size={20} />
-          </Button>
+          {/* User Menu and Mobile Menu Button */}
+          <div className="flex items-center space-x-2">
+            {/* User Info */}
+            {user && (
+              <div className="hidden md:flex items-center space-x-2 px-3 py-1 bg-gray-100 rounded-lg">
+                <span className="text-sm text-gray-700">
+                  {user.firstName} {user.lastName}
+                </span>
+              </div>
+            )}
+            
+            {/* Logout Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logout}
+              className="hidden md:flex items-center"
+            >
+              <ApperIcon name="LogOut" size={16} className="mr-2" />
+              Logout
+            </Button>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden p-2"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <ApperIcon name={isMobileMenuOpen ? "X" : "Menu"} size={20} />
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Search */}
@@ -104,8 +131,25 @@ const Header = ({ onSearch, savedCount = 0 }) => {
                       {item.count}
                     </span>
                   )}
-                </Link>
+</Link>
               ))}
+              
+              {/* Mobile User Info and Logout */}
+              {user && (
+                <div className="pt-4 border-t border-gray-200 mt-4">
+                  <div className="px-4 py-2 text-sm text-gray-700">
+                    Logged in as {user.firstName} {user.lastName}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    onClick={logout}
+                    className="w-full justify-start text-gray-700 hover:bg-gray-100"
+                  >
+                    <ApperIcon name="LogOut" size={16} className="mr-2" />
+                    Logout
+                  </Button>
+                </div>
+              )}
             </nav>
           </motion.div>
         )}
