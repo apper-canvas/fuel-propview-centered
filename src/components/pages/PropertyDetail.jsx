@@ -140,9 +140,12 @@ const formatPrice = (price) => {
         Back to Properties
       </Button>
 
-      {/* Property Gallery */}
-      <PropertyGallery images={property.images} title={property.title} />
-
+{/* Property Gallery */}
+      <PropertyGallery 
+        images={property.images} 
+        title={property.title} 
+        photo360={property.photo360}
+      />
       {/* Property Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Details */}

@@ -17,8 +17,9 @@ images: Array.isArray(uiData.images) ? uiData.images.join(',') : uiData.images,
     coordinates_lat: uiData.coordinates?.lat,
     coordinates_lng: uiData.coordinates?.lng,
     listing_date: uiData.listingDate,
-    status: uiData.status,
-    neighborhood_info: uiData.neighborhoodInfo
+status: uiData.status,
+    neighborhood_info: uiData.neighborhoodInfo,
+    photo360: uiData.photo360
   };
 };
 
@@ -45,9 +46,10 @@ images: dbData.images ? (typeof dbData.images === 'string' ? dbData.images.split
       lat: dbData.coordinates_lat,
       lng: dbData.coordinates_lng
     },
-    listingDate: dbData.listing_date,
+listingDate: dbData.listing_date,
     status: dbData.status,
-    neighborhoodInfo: dbData.neighborhood_info
+    neighborhoodInfo: dbData.neighborhood_info,
+    photo360: dbData.photo360
   };
 };
 
@@ -77,9 +79,10 @@ export const propertyService = {
           { field: { Name: "features" } },
           { field: { Name: "coordinates_lat" } },
 { field: { Name: "coordinates_lng" } },
-          { field: { Name: "listing_date" } },
+{ field: { Name: "listing_date" } },
           { field: { Name: "status" } },
-          { field: { Name: "neighborhood_info" } }
+          { field: { Name: "neighborhood_info" } },
+          { field: { Name: "photo360" } }
         ],
         where: [],
         pagingInfo: { limit: 100, offset: 0 }
@@ -209,9 +212,10 @@ export const propertyService = {
           { field: { Name: "features" } },
           { field: { Name: "coordinates_lat" } },
 { field: { Name: "coordinates_lng" } },
-          { field: { Name: "listing_date" } },
+{ field: { Name: "listing_date" } },
           { field: { Name: "status" } },
-          { field: { Name: "neighborhood_info" } }
+          { field: { Name: "neighborhood_info" } },
+          { field: { Name: "photo360" } }
         ]
       };
       const response = await apperClient.getRecordById('property', parseInt(id), params);
@@ -261,9 +265,10 @@ export const propertyService = {
           { field: { Name: "features" } },
           { field: { Name: "coordinates_lat" } },
 { field: { Name: "coordinates_lng" } },
-          { field: { Name: "listing_date" } },
+{ field: { Name: "listing_date" } },
           { field: { Name: "status" } },
-          { field: { Name: "neighborhood_info" } }
+          { field: { Name: "neighborhood_info" } },
+          { field: { Name: "photo360" } }
         ],
         whereGroups: query ? [{
           operator: "OR",

@@ -129,12 +129,21 @@
     @apply bg-gradient-to-r from-accent to-warning;
   }
   
-  .backdrop-blur-header {
+.backdrop-blur-header {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }
   
   .glass-effect {
     @apply bg-white/80 backdrop-blur-sm border border-white/20;
+  }
+
+  /* 360-degree viewer integration styles */
+  .photo360-container {
+    @apply relative overflow-hidden rounded-lg;
+  }
+  
+  .photo360-controls {
+    @apply absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm;
   }
 }
