@@ -239,16 +239,40 @@ const formatPrice = (price) => {
 </div>
           </div>
 
-          {/* Neighborhood Information */}
+{/* Neighborhood Information */}
           {property.neighborhoodInfo && (
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="font-display text-xl font-semibold text-gray-900 mb-4">
-                Neighborhood Information
-              </h2>
-              <div className="prose max-w-none">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {property.neighborhoodInfo}
-                </p>
+              <div className="flex items-center mb-4">
+                <ApperIcon name="MapPin" size={20} className="mr-2 text-primary" />
+                <h2 className="font-display text-xl font-semibold text-gray-900">
+                  Neighborhood Information
+                </h2>
+              </div>
+              <div className="space-y-4">
+                <div className="prose max-w-none">
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
+                    {property.neighborhoodInfo}
+                  </div>
+                </div>
+                
+                {/* Additional neighborhood highlights */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <ApperIcon name="GraduationCap" size={24} className="mx-auto mb-2 text-blue-600" />
+                    <div className="text-sm font-medium text-blue-900">Schools Nearby</div>
+                    <div className="text-xs text-blue-700">Check local ratings</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <ApperIcon name="Shield" size={24} className="mx-auto mb-2 text-green-600" />
+                    <div className="text-sm font-medium text-green-900">Safety Info</div>
+                    <div className="text-xs text-green-700">Crime statistics</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <ApperIcon name="MapPin" size={24} className="mx-auto mb-2 text-purple-600" />
+                    <div className="text-sm font-medium text-purple-900">Walkability</div>
+                    <div className="text-xs text-purple-700">Transit options</div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
